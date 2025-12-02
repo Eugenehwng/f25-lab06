@@ -1,8 +1,5 @@
 package edu.cmu.cs.cs214.rec02;
 
-import org.junit.Before;
-import org.junit.Test;
-
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -10,7 +7,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import org.junit.Before;
+import org.junit.Test;
 
 
 /**
@@ -38,8 +38,8 @@ public class IntQueueTest {
     @Before
     public void setUp() {
         // comment/uncomment these lines to test each class
-        mQueue = new LinkedIntQueue();
-    //    mQueue = new ArrayIntQueue();
+        // mQueue = new LinkedIntQueue();
+        mQueue = new ArrayIntQueue();
 
         testList = new ArrayList<>(List.of(1, 2, 3));
     }
@@ -53,19 +53,21 @@ public class IntQueueTest {
     @Test
     public void testNotEmpty() {
         // TODO: write your own unit test
-        fail("Test not implemented");
+        mQueue.enqueue(5);
+        assertTrue(!mQueue.isEmpty());
     }
 
     @Test
     public void testPeekEmptyQueue() {
         // TODO: write your own unit test
-        fail("Test not implemented");
+        assertEquals(mQueue.peek(), null);
     }
 
     @Test
     public void testPeekNoEmptyQueue() {
         // TODO: write your own unit test
-        fail("Test not implemented");
+        mQueue.enqueue(5);
+        assertEquals(Integer.valueOf(5), mQueue.peek());
     }
 
     @Test
@@ -81,7 +83,14 @@ public class IntQueueTest {
     @Test
     public void testDequeue() {
         // TODO: write your own unit test
-        fail("Test not implemented");
+        for (int i = 0; i < testList.size(); i++) {
+            mQueue.enqueue(testList.get(i));
+        }
+        for (int i = 0; i < testList.size(); i++) {
+            Integer value = mQueue.dequeue();
+            assertEquals(testList.get(i), value);
+            assertEquals(mQueue.size(), testList.size() - i - 1);
+        }
     }
 
     @Test
@@ -105,5 +114,41 @@ public class IntQueueTest {
         }
     }
 
+    @Test
+    public void testClear() {
+        mQueue.clear();
+        assertEquals(mQueue.size(), 0);
+    }
 
+
+    @Test
+    public void testDequeueEmpty() {
+        assertEquals(mQueue.dequeue(), null);
+    }
+
+    @Test
+    public void testEnsureCapacityWithWrapping() {
+        // Step 1: Fill array to capacity (head = 0, size = 10)
+        for (int i = 0; i < 10; i++) {
+            mQueue.enqueue(i);
+        }
+        
+        // Step 2: Dequeue some elements to move head forward (head > 0)
+        mQueue.dequeue(); // head = 1, size = 9
+        mQueue.dequeue(); // head = 2, size = 8
+        
+        // Step 3: Fill back to capacity (head = 2, size = 10)
+        // Now the array has wrapped: elements at indices 2-9 and 0-1
+        for (int i = 10; i < 12; i++) {
+            mQueue.enqueue(i); // head = 2, size = 10
+        }
+        
+        // Step 4: Enqueue one more to trigger resize with head = 2
+        mQueue.enqueue(12); // This triggers ensureCapacity() with head = 2
+        
+        // Verify all elements are preserved in correct order
+        assertEquals(Integer.valueOf(2), mQueue.dequeue());
+        assertEquals(Integer.valueOf(11), mQueue.dequeue());
+        // ... continue checking
+    }
 }
